@@ -1,5 +1,15 @@
 'use client'; // This tells Next.js that the following component should be rendered on the client side (browser).
 
+/**
+ * Home component for the Rate My Professor AI Chatbox
+ * This component renders the chatbox where users can interact with an AI assistant 
+ * that provides answers based on the Rate My Professor data. It includes:
+ * - A list of chat messages from the user and AI assistant
+ * - A text input for the user to type their messages
+ * - A button to send the message or use the "Enter" key to submit
+ * The component handles fetching AI responses from a backend API.
+ */
+
 // Import necessary components from Material-UI and React hooks
 import { Box, Button, Stack, TextField, Typography, Container } from '@mui/material';
 import { useState } from 'react';
@@ -12,13 +22,11 @@ export default function Home() {
 
   // State to manage the current message being typed by the user
   const [message, setMessage] = useState('');
-  const [isThinking, setIsThinking] = useState(false); // State to track if AI is processing
 
   // Function to send a message when the user presses "Send" or hits the Enter key
   const sendMessage = async () => {
     if (!message.trim()) return; // Prevent sending empty messages
     setMessage(''); // Clear the input field after sending the message
-    setIsThinking(true); // Set the AI as "thinking" when processing starts
 
     // Add the user's message to the list of messages and an empty placeholder for the assistant's response
     setMessages([...messages, { role: 'user', content: message }, { role: 'assistant', content: '' }]);
@@ -37,10 +45,7 @@ export default function Home() {
 
     // Process the streamed response as it arrives
     reader.read().then(function processText({ done, value }) {
-      if (done) {
-        setIsThinking(false); // Stop the "thinking" animation once response is complete
-        return result; // If reading is finished, return the result
-      }
+      if (done) return result; // If reading is finished, return the result
 
       const text = decoder.decode(value || new Uint8Array(), { stream: true });
       setMessages((messages) => {
@@ -61,7 +66,7 @@ export default function Home() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', height: '90vh', justifyContent: 'center'}}>
+    <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', height: '90vh', justifyContent: 'center' }}>
       {/* Header Section with attribution */}
       <Typography variant="h6" sx={{ position: 'absolute', top: 10, left: 20 }}>
         by Sabeeh Hassany, built using OpenAI, Pinecone, Next.js, and Material-UI
@@ -93,17 +98,7 @@ export default function Home() {
                   fontSize: '18px', // Increase font size by one level
                 }}
               >
-                {message.content || (isThinking && ( // Show the animated circle while AI is thinking
-                  <Box
-                    sx={{
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '50%',
-                      backgroundColor: '#eceff1',
-                      animation: 'pulse 1s infinite', // Add animation to pulse the circle
-                    }}
-                  />
-                ))}
+                {message.content}
               </Box>
             </Box>
           ))}
@@ -138,20 +133,6 @@ export default function Home() {
           </Button>
         </Stack>
       </Stack>
-      {/* Keyframe for the pulsing animation */}
-      <style jsx>{`
-        @keyframes pulse {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.3); // Grow the circle
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-      `}</style>
     </Container>
   );
 }
